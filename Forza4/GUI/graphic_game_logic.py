@@ -108,6 +108,11 @@ class Tabellone:
         self.display_surf.blit(self.red_token_img, self.red_pile_rect)  # rosso a sinistra
         self.display_surf.blit(self.black_token_img, self.black_pile_rect)  # nero a destra
 
+    def update_display(self):
+        # aggiornamento finestra di gioco
+        pygame.display.update()
+        self.clock.tick()
+
     @staticmethod
     def get_lowest_empty_space(board, column):
         # ritorna il numero della riga in cui è disponibile il primo spazio vuoto per la colonna scelta e - 1 se
