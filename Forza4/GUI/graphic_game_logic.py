@@ -66,3 +66,54 @@ class Tabellone:
         for x in range(constants.BOARDWIDTH):
             board.append([constants.EMPTY] * constants.BOARDHEIGHT)
         return board
+
+    def make_movee(self, board, player, column):
+        # se è presente una cella vuota (la piu in basso) nella colonna in cui si vuole posizionare la pedina,
+        # il giocatore viene posizionato in quella cella
+        lowest = self.get_lowest_empty_space(board, column)
+        if lowest != -1:
+            board[column][lowest] = player
+
+    def draw_board(self, board, extra_token=None):
+        self.display_surf.fill(constants.BGCOLOR)
+
+        # disegna il tabellone e inserisce le immagini dei gettoni rossi e neri dove presenti
+        space_rect = pygame.Rect(0, 0, constants.SPACESIZE, constants.SPACESIZE)
+        for x in range(constants.BOARDWIDTH):
+            for y in range(constants.BOARDHEIGHT):
+                space_rect.topleft = (
+                    constants.XMARGIN + (x * constants.SPACESIZE), constants.YMARGIN + (y * constants.SPACESIZE))
+                if board[x][y] == constants.RED:
+                    self.display_surf.blit(self.red_token_img, space_rect)
+                elif board[x][y] == constants.BLACK:
+                    self.display_surf.blit(self.black_token_img, space_rect)
+
+        # disegna l'extra token, ovvero il gettone appena inserito, nella posizione specificata dalle coordinate
+        if extra_token is not None:
+            if extra_token['color'] == constants.RED:
+                self.display_surf.blit(self.red_token_img,
+                                       (extra_token['x'], extra_token['y'], constants.SPACESIZE, constants.SPACESIZE))
+            elif extra_token['color'] == constants.BLACK:
+                self.display_surf.blit(self.black_token_img,
+                                       (extra_token['x'], extra_token['y'], constants.SPACESIZE, constants.SPACESIZE))
+
+        # dopo aver disegnato i gettoni disegna le celle copra per delineare la struttura del tabellone
+        for x in range(constants.BOARDWIDTH):
+            for y in range(constants.BOARDHEIGHT):
+                space_rect.topleft = (
+                    constants.XMARGIN + (x * constants.SPACESIZE), constants.YMARGIN + (y * constants.SPACESIZE))
+                self.display_surf.blit(self.board_img, space_rect)
+
+        # disegna i gettoni laterali dei giocatori
+        self.display_surf.blit(self.red_token_img, self.red_pile_rect)  # rosso a sinistra
+        self.display_surf.blit(self.black_token_img, self.black_pile_rect)  # nero a destra
+
+    @staticmethod
+    def get_lowest_empty_space(board, column):
+        # ritorna il numero della riga in cui è disponibile il primo spazio vuoto per la colonna scelta e - 1 se
+        # la colonna è piena
+        # il ciclo itera attraverso le righe dalla parte bassa della colonna verso l'alto
+        for y in range(constants.BOARDHEIGHT - 1, -1, -1):
+            if board[column][y] == constants.EMPTY:
+                return y
+        return -1
