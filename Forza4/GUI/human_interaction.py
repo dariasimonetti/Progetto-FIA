@@ -50,3 +50,13 @@ def get_human_interaction(board, game_instance):
             pygame.display.update()
             game_instance.clock.tick()
 
+def drop_human_token(board, column, game_instance):
+
+    animate_dropping_token(board, column, constants.RED, game_instance)  # gestisce l'animazione della caduta del
+    # gettone rosso nella colonna specificata
+    board[column][game_instance.get_lowest_empty_space(board, column)] = constants.RED  # la posizione finale del
+    # gettone rosso viene determinata
+
+    # La scacchiera viene ridisegnata
+    game_instance.draw_board(board)
+    pygame.display.update()
