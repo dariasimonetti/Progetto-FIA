@@ -48,6 +48,60 @@ class State:
         # se nessuno dei controlli precedenti è andato a buon fine allora nessuno ha (ancora) vinto
         return False
 
+    @staticmethod
+    def is_draw(position):
+        # controllo pareggio: si scorrono tutte le colonne del tabellone e si controlla per ognuno l'ultimo spazio vuoto
+        # (quello piu in alto), se è occupato per tutte le colonne allora c'è un pareggio
+        return all(position & (1 << (7 * column + 5)) for column in range(0, 7))
+
+    def terminal_node_test(self):
+        # controllo se lo stato attuale del gioco è un nodo terminale, quindi la partita è terminata.
+
+        # controllo se l'ia ha vinto
+        if self.is_winning_state(self.ai_position):
+            self.status = -1
+            return True
+
+        # controllo se ha vinto il giocatore umano
+        elif self.is_winning_state(self.player_position):
+            self.status = 1
+            return True
+
+        # controllo se è finita in pareggio
+        elif self.is_draw(self.game_position):
+            self.status = 0
+            return True
+
+        # se nessuno dei controlli è soddisfatto la partita è ancora in corso
+        else:
+            return False
+
+    def calculate_heuristic(self):
+        # valutazione euristica dello stato del gioco,  progettata per guidare l'algoritmo di ricerca verso mosse che
+        # sembrano promettenti dalla prospettiva dell'IA
+
+        if self.status == -1:  # l'IA ha vinto
+            return 1000 - self.depth  # Punteggio più alto per vittoria, penalizzato dalla profondità (meno mosse sono
+            # preferibili)
+
+        elif self.status == 1:  # Il giocatore ha vinto
+            return -1000 + self.depth  # Viene assegnato un unteggio più basso per la vittoria del giocatore
+            # penalizzato dalla profondità
+
+        elif self.status == 0:  # pareggio
+            return 0  # punteggio neutro
+        else:
+            # Calcolo di una valutazione basata sulla posizione delle pedine sul tabellone
+
+            # calcolo del punteggio dell'ia
+            ai_score = self.calculate_positional_score(self.ai_position)
+
+            # calcolo del punteggio del giocatore
+            player_score = self.calculate_positional_score(self.player_position)
+
+            # differenza dei punteggi resituita come valutazione
+            return ai_score - player_score
+
     def calculate_positional_score(self, position):
         # calcola un punteggio basato sulla disposizione delle pedine sul tabellone per uno specifico giocatore
         score = 0
@@ -65,6 +119,31 @@ class State:
 
         return score
 
+    @staticmethod
+    def score_near_winning(position, count_required, empty_space):
+
+        # Calcola il punteggio per le combinazioni di pedine vicine alla vittoria.
+
+        score = 0
+        # ciclo che scorre ogni cella del tabellone
+        for row in range(6):
+            for col in range(7):
+
+                # Per ogni cella del tabellone, il metodo controlla il valore della cella che sarà 1 se la cella è
+                # occupata da quel giocatore, 0 altrimenti
+                cell_value = (position >> (7 * col + row)) & 1
+
+                # Per ogni cella del tabellone che contiene una pedina del giocatore corrente:
+                if cell_value == 1:
+
+                    # il metodo controlla se ci sono count_required pedine consecutive in una riga.
+                    if col <= 7 - count_required:
+                        # Il controllo si estende verso sinistra per verificare se ci sono abbastanza pedine consecutive
+                        # e se ci sono abbastanza celle vuote sulla sinistra per formare una combinazione vincente.
+                        if bin(position >> (7 * col + row)).count('1') == count_required:
+                            score += empty_space
+
+                    #  il metodo controlla se ci sono count_required pedine consecutive in una colonna.
 
     def generate_children(self, who_went_first):
         # genera tutti i possibili stati successivi (figli) a partire dallo stato attuale del gioco
