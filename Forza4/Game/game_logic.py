@@ -84,3 +84,26 @@ class ForzaQuattroGame:
 
         # aggiorna lo stato corrente del gioco con la nuova posizione di gioco e incrementa la profondità di uno.
         self.current_state = State(self.current_state.ai_position, new_game_position, self.current_state.depth + 1)
+
+    def query_ai(self, game_instance):
+
+        print("\nMossa dell'IA...")
+        # salva l'attuale posizione dell'ai
+        temp_position = self.current_state.ai_position
+
+        # calcolo della nuova posizone tramite l'algoritmo alpha-beta pruning
+        self.current_state = alphabeta_search(self.current_state, self.first, d=7)
+
+        # calcolo della colonna in cui l'ia posiizona la pedina
+        column = temp_position ^ self.current_state.ai_position  # viene eseguito uno XOR tra la vecchia posizione
+        # dell'ia e il risultato dell'algoritmo alpha beta. il risultato rappresenta i bit diversi tra le due posizioni
+        # identificando così la colonna
+
+        # calcolo dell'indice della colonna
+        column = (column.bit_length() - 1) // 7
+
+        # esecuzione dell'animazione della mossa
+        animate_computer_moving(self.board, column, self.game_instance)
+
+        # esecuzione effettiva della mossa nell'istanza di gioco
+        game_instance.make_movee(self.board, BLACK, column)
