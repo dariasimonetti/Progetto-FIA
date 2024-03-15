@@ -20,11 +20,11 @@ class Tabellone:
                                            constants.SPACESIZE, constants.SPACESIZE)
 
         # caricamento immagini dei gettoni rossi e neri e delle caselle del tabellone
-        self.red_token_img = pygame.image.load('images/4row_red.png')
+        self.red_token_img = pygame.image.load('images/4row_blu.png')
         self.red_token_img = pygame.transform.smoothscale(self.red_token_img, (constants.SPACESIZE,
                                                                                constants.SPACESIZE))
 
-        self.black_token_img = pygame.image.load('images/4row_black.png')
+        self.black_token_img = pygame.image.load('images/4row_orange.png')
         self.black_token_img = pygame.transform.smoothscale(self.black_token_img, (constants.SPACESIZE,
                                                                                    constants.SPACESIZE))
 
