@@ -289,6 +289,16 @@ def alphabeta_search(state, turn=-1, d=7):
     # alla fine del ciclo best-action conterrà l'azione che l'algoritmo ritiene essere la migliore da svolgere
     return best_action
 
+def make_move_opponent(position, mask, col):
+    # metodo di supporto utilizzato per calcolare solo la nuova posizione del tabellone dopo che il giocatore avversario
+    # ha effettuato una mossa in una determinata colonna
+
+    new_mask = mask | (mask + (1 << (col * 7)))  # Calcola la nuova maschera aggiungendo la mossa del giocatore
+    # umano alla maschera esistente
+
+    # Ritorna la posizione corrente del giocatore e la nuova maschera della board.
+    return position, new_mask
+
 
 def print_board(state):
     # metodo di supporto per stampare una rappresentazione visiva del tabellone di gioco
