@@ -102,7 +102,6 @@ class State:
             # differenza dei punteggi resituita come valutazione
             return ai_score - player_score
 
-
     def calculate_positional_score(self, position):
         # calcola un punteggio basato sulla disposizione delle pedine sul tabellone per uno specifico giocatore
         score = 0
@@ -190,6 +189,7 @@ class State:
                 # usiamo yield per restituire lo stato figlio corrente. Questo permette di iterare attraverso tutti
                 # gli stati figli generati dalla funzione generate_children uno alla volta.
                 yield State(new_ai_position, new_game_position, self.depth + 1)
+
 
 def alphabeta_search(state, turn=-1, d=7):
     # algoritmo di ricerca con potatura alpha-beta
@@ -288,6 +288,7 @@ def alphabeta_search(state, turn=-1, d=7):
 
     # alla fine del ciclo best-action conterrà l'azione che l'algoritmo ritiene essere la migliore da svolgere
     return best_action
+
 
 def make_move_opponent(position, mask, col):
     # metodo di supporto utilizzato per calcolare solo la nuova posizione del tabellone dopo che il giocatore avversario
