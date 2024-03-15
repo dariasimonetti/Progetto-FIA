@@ -102,6 +102,7 @@ class State:
             # differenza dei punteggi resituita come valutazione
             return ai_score - player_score
 
+
     def calculate_positional_score(self, position):
         # calcola un punteggio basato sulla disposizione delle pedine sul tabellone per uno specifico giocatore
         score = 0
@@ -144,6 +145,28 @@ class State:
                             score += empty_space
 
                     #  il metodo controlla se ci sono count_required pedine consecutive in una colonna.
+                    if row <= 6 - count_required:
+                        # il controllo si estende per verificare se ci sono abbastanza celle vuote per effettuare una
+                        # mossa vicino alla vittoria
+                        if bin(position >> (7 * col + row)).count('1') == count_required:
+                            score += empty_space
+
+                        # il metodo controlla diagonalmente verso destra
+                    if col <= 7 - count_required and row <= 6 - count_required:
+                        if bin(position >> (7 * col + row)).count('1') == count_required:
+                            score += empty_space
+
+                        # il metodo controlla diagonalmente verso sinistra
+                    if col >= count_required - 1 and row <= 6 - count_required:
+                        if bin(position >> (7 * col + row)).count('1') == count_required:
+                            score += empty_space
+
+                        # se count_required è uguale a 3, viene aggiunto un punteggio aggiuntivo per i blocchi di 3
+                    if count_required == 3 and col <= 7 - count_required and row <= 6 - count_required:
+                        if bin(position >> (7 * col + row)).count('1') == count_required - 1:
+                            score += empty_space / 2  # Punteggio aggiuntivo per i blocchi di 3
+
+                    return score
 
     def generate_children(self, who_went_first):
         # genera tutti i possibili stati successivi (figli) a partire dallo stato attuale del gioco
@@ -167,3 +190,117 @@ class State:
                 # usiamo yield per restituire lo stato figlio corrente. Questo permette di iterare attraverso tutti
                 # gli stati figli generati dalla funzione generate_children uno alla volta.
                 yield State(new_ai_position, new_game_position, self.depth + 1)
+
+def alphabeta_search(state, turn=-1, d=7):
+    # algoritmo di ricerca con potatura alpha-beta
+
+    # Definizione delle funzioni che rappresentano i nodi MAX e MIN nell'algoritmo MiniMax. Esplorano ricorsivamente i
+    # nodi dell'albero di gioco e calcolano il valore associato ad ogni stato
+
+    # la funzione max_value è responsabile di esplorare i nodi di tipo MAX nell'albero di gioco e restituire il valore
+    # massimo ottenibile da tale nodo
+    def max_value(state, alpha, beta, depth):
+        if cutoff_search(state, depth):  # controlla se lo stato corrente è uno stato terminale o se la profondità
+            # massima di ricerca è stata raggiunta
+            return state.calculate_heuristic()  # in caso affermativo viene resituito il valore euristico dello stato
+
+        v = -infinity  # valore massimo che il nodo MAX può ottenere esplorando i suoi figli
+
+        # iterazione sui figli
+        for child in state.generate_children(turn):
+
+            if child in seen:  # se il figlio è stato già visto allora si passa al prossimo
+                continue
+
+            v = max(v, min_value(child, alpha, beta,
+                                 depth + 1))  # viene calcolato il valore minimo che il nodo MIN può
+            # ottenere esplorando i suoi figli. Il massimo tra il valore corrente di v e il valore calcolato per il
+            # figlio viene quindi assegnato a v.
+
+            seen[child] = alpha
+
+            if v >= beta:  # Se il valore di v diventa maggiore o uguale a beta, viene eseguita la potatura Alpha-Beta
+                # l'algoritmo restituisce immediatamente il valore di v, poiché il nodo MIN ignorerà completamente
+                # questo ramo in quanto il suo valore non può essere superiore a beta.
+                return v
+
+            alpha = max(alpha, v)  # alpha viene aggiornata al massimo tra il suo valore corrente e il valore di v
+
+        if v == -infinity:
+            # Se il valore di v rimane -infinity, significa che non è stata trovata nessuna vittoria/sconfitta/pareggio
+            # fino a questo punto
+            return infinity
+        return v
+
+    # la funzione esplora i nodi di tipo MIN nell'albero di gioco e restituire il valore minimo ottenibile da tale nodo
+    def min_value(state, alpha, beta, depth):
+
+        if cutoff_search(state, depth):  # controlla se lo stato corrente è uno stato terminale o se la profondità
+            # massima di ricerca è stata raggiunta
+            return state.calculate_heuristic()  # in caso affermativo viene resituito il valore euristico dello stato
+
+        v = infinity  # valore minimo che il nodo MIN può ottenere esplorando i suoi figli
+
+        for child in state.generate_children(turn):
+            if child in seen:
+                continue
+
+            v = min(v, max_value(child, alpha, beta, depth + 1))  # calcolo del valore massimo che il nodo MAX può
+            # ottenere esplorando i suoi figli. Il minimo tra il valore corrente di v e il valore calcolato per il
+            # figlio viene quindi assegnato a v.
+
+            seen[child] = alpha
+
+            if v <= alpha:  # Se il valore di v diventa mminore o uguale ad aplha, viene eseguita la potatura Alpha-Beta
+                # l'algoritmo restituisce immediatamente il valore di v, poiché il nodo MAX ignorerà completamente
+                # questo ramo in quanto il suo valore non può essere inferiore ad alpha.
+                return v
+
+            beta = min(beta, v)  # beta viene aggiornata al minimo tra il suo valore corrente e il valore di v
+
+        if v == infinity:
+            # Se il valore di v rimane infinity, significa che non è stata trovata nessuna vittoria/sconfitta/pareggio
+            # fino a questo punto
+            return -infinity
+        return v
+
+    # dizionario seen per tenere traccia degli stati già visitati.
+    seen = {}
+
+    # corpo dell'algoritmo:
+
+    # funzione cutoff_search restituisce True se lo stato corrente è terminale o se la profondità massima di ricerca è
+    # stata raggiunta, altrimenti restituisce False.
+    cutoff_search = (lambda state, depth: depth > d or state.terminal_node_test())
+
+    best_score = -infinity
+    beta = infinity
+    best_action = None
+
+    for child in state.generate_children(turn):  # iterazione su tutti i figli dello stato corrente
+        # per ogni figlio:
+        v = min_value(child, best_score, beta, 1)  # calcolo del valore che rappresenta la valutazione dell'azione
+        # per il giocatore corrente.
+
+        if v > best_score:  # se v è maggiore del best score
+            best_score = v
+            best_action = child  # l'azione migliore sarà il figlio corrente
+
+    # alla fine del ciclo best-action conterrà l'azione che l'algoritmo ritiene essere la migliore da svolgere
+    return best_action
+
+
+def print_board(state):
+    # metodo di supporto per stampare una rappresentazione visiva del tabellone di gioco
+
+    ai_board, total_board = state.ai_position, state.game_position
+    for row in range(5, -1, -1):
+        print("")
+        for column in range(0, 7):
+            if ai_board & (1 << (7 * column + row)):
+                print("1", end='')
+            elif total_board & (1 << (7 * column + row)):
+                print("2", end='')
+            else:
+                print("0", end='')
+    print("")
