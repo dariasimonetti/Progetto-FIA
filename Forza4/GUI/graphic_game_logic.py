@@ -19,7 +19,7 @@ class Tabellone:
                                            constants.WINDOWHEIGHT - int(3 * constants.SPACESIZE / 2),
                                            constants.SPACESIZE, constants.SPACESIZE)
 
-        # caricamento immagini dei gettoni rossi e neri e delle caselle del tabellone
+        # caricamento immagini dei gettoni blu e arancioni (inizialmente rossi e neri) e delle caselle del tabellone
         self.red_token_img = pygame.image.load('images/4row_blu.png')
         self.red_token_img = pygame.transform.smoothscale(self.red_token_img, (constants.SPACESIZE,
                                                                                constants.SPACESIZE))
