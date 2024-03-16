@@ -16,7 +16,7 @@ class State:
 
     status = 3
 
-    def _init_(self, ai_position, game_position, depth=0):
+    def __init__(self, ai_position, game_position, depth=0):
         # inizializza gli attributi
         self.ai_position = ai_position
         self.game_position = game_position

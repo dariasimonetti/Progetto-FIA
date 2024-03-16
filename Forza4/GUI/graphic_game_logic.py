@@ -5,7 +5,7 @@ from Forza4.GUI import constants
 
 
 class Tabellone:
-    def _init_(self):
+    def __init__(self):
         pygame.init()
         self.clock = pygame.time.Clock()
         self.display_surf = pygame.display.set_mode((constants.WINDOWWIDTH, constants.WINDOWHEIGHT))

@@ -9,7 +9,7 @@ class ForzaQuattroGame:
     AI = -1
     PLAYER = 0
 
-    def _init_(self, game_board, game_instance):
+    def __init__(self, game_board, game_instance):
         self.game_instance = game_instance  # interfaccia grafica
         self.current_state = State(0, 0)  # stato inziale del gioco con posizione di ia e player impostate a 0
 
