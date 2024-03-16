@@ -290,6 +290,19 @@ def alphabeta_search(state, turn=-1, d=7):
     return best_action
 
 
+def make_move(position, mask, col):
+    # metodo di supporto utilizzato per effettuare una mossa e restituire la nuova posizione + la nuova posizione del
+    # tabellone
+
+    # mask = maschera del tabellone che indica le posizioni già occupate dalle pedine di entrambi i giocatori
+    opponent_position = position ^ mask  # calcolo posizione dell'avversario
+    new_mask = mask | (mask + (1 << (col * 7)))  # calcolo della nuova maschera del tabellone aggiungendo la mossa del
+    # giocatore corrente alla maschera esistente.
+
+    # Ritorna la posizione del giocatore  dopo che è stata effettuata la mossa e la nuova maschera del tabellone
+    return opponent_position ^ new_mask, new_mask
+
+
 def make_move_opponent(position, mask, col):
     # metodo di supporto utilizzato per calcolare solo la nuova posizione del tabellone dopo che il giocatore avversario
     # ha effettuato una mossa in una determinata colonna
