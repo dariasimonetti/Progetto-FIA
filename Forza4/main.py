@@ -3,7 +3,7 @@ from GUI.graphic_game_logic import Tabellone
 from GUI import constants
 
 
-if __name__ == "_main_":
+if __name__ == "__main__":
     print("Benvenuto a Forza 4")
 
     game_instance = Tabellone()
